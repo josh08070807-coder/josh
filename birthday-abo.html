@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Happy Birthday · 小阿波 🎂</title>
+  <meta name="description" content="密碼解鎖 · 柔粉生日卡 · 可下載" />
+  <!-- 字體：手寫風 + 思源黑體（備援） -->
+  <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --pink-50:#fff7fa; --pink-100:#ffe9f0; --pink-200:#ffd6e3;
+      --ink:#2b2b2b; --sub:#6b7280; --brand:#ff6b9a;
+      --card:#ffffff; --shadow:0 18px 40px rgba(0,0,0,.10); --radius:24px;
+    }
+    *{box-sizing:border-box} html,body{height:100%}
+    body{
+      margin:0; color:var(--ink);
+      font-family:"Noto Sans TC", system-ui, -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
+      background:
+        radial-gradient(1200px 600px at 10% 0%, var(--pink-100), transparent),
+        radial-gradient(1000px 600px at 90% 20%, var(--pink-200), transparent),
+        linear-gradient(180deg, var(--pink-50), #fff);
+      overflow-x:hidden;
+    }
+    /* —— 密碼頁 —— */
+    #gate{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; padding:24px; background:linear-gradient(180deg,var(--pink-50),#fff); z-index:20}
+    .lock{
+      width:min(520px,92vw); background:var(--card); border-radius:var(--radius);
+      box-shadow:var(--shadow); padding:28px 22px; text-align:center; position:relative; overflow:hidden
+    }
+    .lock::before{content:""; position:absolute; inset:-40% -20%;
+      background:radial-gradient(closest-side, rgba(255,203,221,.5), transparent 60%);
+      filter:blur(30px); z-index:0}
+    .lock h1{position:relative; z-index:1; margin:2px 0 10px; font-size:clamp(22px,4vw,28px)}
+    .hint{position:relative; z-index:1; color:var(--sub); margin-bottom:16px}
+    .pin{position:relative; z-index:1; display:flex; gap:10px; justify-content:center; margin:16px 0}
+    .pin input{width:60px; height:60px; text-align:center; font-size:28px; border-radius:14px; border:1px solid #f2c9d7; outline:none; background:#fffafb}
+    .btn{position:relative; z-index:1; appearance:none; border:none; border-radius:14px; padding:12px 18px; font-weight:800; background:var(--brand); color:#fff; box-shadow:var(--shadow); cursor:pointer}
+    .err{position:relative; z-index:1; color:#d33; min-height:20px; margin-top:10px}
+
+    /* —— 內容頁 —— */
+    #app{opacity:0; pointer-events:none; transition:opacity .8s ease}
+    #app.ready{opacity:1; pointer-events:auto}
+    header{min-height:88vh; display:grid; place-items:center; padding:64px 20px; position:relative; overflow:hidden}
+
+    /* 柔焦背景輪播 */
+    .bg{position:absolute; inset:0; z-index:0; filter: blur(6px) saturate(110%); opacity:.45}
+    .bg img{position:absolute; width:100%; height:100%; object-fit:cover; transition:opacity 1s ease}
+    .bg img:not(.show){opacity:0}
+
+    .hero{position:relative; z-index:2; text-align:center; max-width:960px}
+    .badge{display:inline-flex; gap:8px; align-items:center; padding:8px 14px; border-radius:999px; background:#ffe6ef; color:#b31642; font-weight:700; font-size:14px}
+    h1{margin:14px 0 8px; font-size: clamp(30px, 6vw, 56px); font-weight:800}
+    .title-hand{font-family:"Ma Shan Zheng","Noto Sans TC", cursive; font-weight:400; letter-spacing:.5px}
+    .lead{color:var(--sub); font-size:clamp(15px,2.6vw,18px); margin:0 0 18px}
+    .tap{display:inline-block; margin-top:10px; padding:10px 16px; border-radius:999px; background:#fff; box-shadow:var(--shadow); font-weight:700; cursor:pointer}
+
+    section{padding: 36px 20px}
+    .wrap{max-width: 1000px; margin:auto}
+    .card{position:relative; background:rgba(255,255,255,.86); backdrop-filter: blur(6px); border:1px solid #ffd7e5; border-radius:var(--radius); box-shadow:var(--shadow); padding:26px}
+    .paper{
+      font-family:"Ma Shan Zheng","Noto Sans TC", cursive; font-size:22px; line-height:1.9; color:#4b5563; white-space:pre-wrap;
+      background: repeating-linear-gradient(180deg, rgba(255,240,246,.8), rgba(255,240,246,.8) 34px, rgba(255,220,236,.6) 35px);
+      padding:22px 18px; border-radius:18px; border:1px dashed #ffc1d4
+    }
+    .typing{border-right:2px solid var(--brand)}
+
+    /* 浮動愛心 */
+    .heart{position:fixed; bottom:-20px; font-size:22px; color:#ff7b9c; opacity:.9; animation: floatUp 6.5s linear forwards; z-index:1}
+    @keyframes floatUp{0%{transform: translateY(0) translateX(0) scale(.9); opacity:.9} 70%{opacity:.9} 100%{transform: translateY(-110vh) translateX(var(--dx)) scale(1.15); opacity:0}}
+
+    /* 音樂與下載控制 */
+    .controls{position: fixed; right:16px; bottom:16px; display:flex; gap:10px; z-index:5}
+    .ctrl{border:none; background:#fff; color:#111; padding:10px 14px; border-radius:999px; box-shadow:var(--shadow); font-weight:800; cursor:pointer}
+
+    footer{padding:40px 20px 80px; text-align:center; color:#6b7280}
+  </style>
+</head>
+<body>
+  <!-- 🔒 密碼頁 -->
+  <div id="gate" role="dialog" aria-modal="true">
+    <div class="lock">
+      <h1>🔒 請輸入通關密碼</h1>
+      <div class="hint">提示：妳的生日（四位數）💕</div>
+      <div class="pin" id="pin">
+        <input inputmode="numeric" maxlength="1" aria-label="第一碼">
+        <input inputmode="numeric" maxlength="1" aria-label="第二碼">
+        <input inputmode="numeric" maxlength="1" aria-label="第三碼">
+        <input inputmode="numeric" maxlength="1" aria-label="第四碼">
+      </div>
+      <button class="btn" id="unlock">解鎖</button>
+      <div class="err" id="err"></div>
+    </div>
+  </div>
+
+  <!-- 🎂 內容頁 -->
+  <div id="app" aria-live="polite">
+    <header>
+      <!-- 柔焦背景輪播（你的三張照片） -->
+      <div class="bg" aria-hidden="true">
+        <img id="bg1" class="show" src="https://drive.google.com/uc?export=view&id=10F7c4lYwIqlfw1aoM_0KAwoyBjUJbQEy" alt="bg1"/>
+        <img id="bg2" src="https://drive.google.com/uc?export=view&id=1PIoRM4NDHYuXy9gx8lsWp5873Z6FzMba" alt="bg2"/>
+        <img id="bg3" src="https://drive.google.com/uc?export=view&id=12_GUZMwTt6N1Nf15Hlxlm0R6E3e5GqPJ" alt="bg3"/>
+      </div>
+      <div class="hero">
+        <span class="badge">🎉 Happy 21st</span>
+        <h1 class="title-hand">小阿波，祝妳21歲生日快樂</h1>
+        <p class="lead">這是一份只屬於妳的柔粉小宇宙 💞</p>
+        <button id="reveal" class="tap">👉 點我看看</button>
+      </div>
+    </header>
+
+    <section>
+      <div class="wrap">
+        <div id="card" class="card">
+          <div id="letter" class="paper typing" style="min-height: 220px"></div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div>Made with ❤ by 喬兒波</div>
+      <div style="font-size:12px; color:#9aa1aa">如果有重來，我還是會選妳。</div>
+    </footer>
+
+    <!-- 控制：音樂播放 / 下載卡片 -->
+    <div class="controls">
+      <button class="ctrl" id="btnAudio">🎵 播放</button>
+      <button class="ctrl" id="btnSave">📥 下載卡片</button>
+    </div>
+  </div>
+
+  <!-- 隱藏的 YouTube 播放器（登入後自動播放） -->
+  <iframe id="yt" width="0" height="0" src="https://www.youtube.com/embed/N5qWjQ9j6l0?enablejsapi=1" title="YouTube player" frameborder="0" allow="autoplay"></iframe>
+
+  <!-- 下載卡片：html2canvas CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <!-- YouTube API -->
+  <script>const tag=document.createElement('script');tag.src='https://www.youtube.com/iframe_api';document.body.appendChild(tag);</script>
+
+  <script>
+    // ====== 基本元素 ======
+    const gate = document.getElementById('gate');
+    const inputs = [...document.querySelectorAll('#pin input')];
+    const unlockBtn = document.getElementById('unlock');
+    const err = document.getElementById('err');
+    const app = document.getElementById('app');
+    const revealBtn = document.getElementById('reveal');
+    const letterEl = document.getElementById('letter');
+    const btnAudio = document.getElementById('btnAudio');
+    const btnSave = document.getElementById('btnSave');
+
+    // 你的原文（保持不修改）
+    const cardText = `小阿波 祝妳21歲生日快樂\n這是我們一起過的第三個生日🎂\n我是真的很喜歡妳的啊\n謝謝妳這段時間時間的包容跟付出\n跟妳在一起之後我們兩個真的都變厲害了不少\n尤其是我的小波 什麼都變了好多 變得更厲害了 也更像大人了 也變的更漂亮了 只有我這個大胖波變得好醜啊 又胖又醜的 但還是謝謝妳對我的不離不棄 \n接下來我們就要出社會了 希望未來的風風雨雨不要那麼大 要不然會被吹走的 希望我們都可以繼續加油努力 為自己的未來認真的生活\n祝我阿波生日快樂 21歲是很老的波了 身體要健康 菸少抽一點 少熬夜 多運動 然後平平安安\n\n妳的大胖喬兒波2025.10.25`;
+
+    // ====== 密碼輸入 UX ======
+    inputs[0].focus();
+    inputs.forEach((inp, idx)=>{
+      inp.addEventListener('input', ()=>{
+        inp.value = inp.value.replace(/\\D/g,'');
+        if(inp.value && idx<3) inputs[idx+1].focus();
+      });
+      inp.addEventListener('keydown', e=>{
+        if(e.key==='Backspace' && !inp.value && idx>0){ inputs[idx-1].focus(); }
+      })
+    });
+
+    let player, isPlaying=false;
+    function onYouTubeIframeAPIReady(){ player = new YT.Player('yt', {events:{}}); }
+    function tryPlay(){ if(player && player.playVideo){ player.playVideo(); isPlaying=true; btnAudio.textContent='⏸ 暫停'; }}
+    function pause(){ if(player && player.pauseVideo){ player.pauseVideo(); isPlaying=false; btnAudio.textContent='🎵 播放'; }}
+
+    // 成功解鎖：關門 → 顯示內容 → 自動播放
+    unlockBtn.addEventListener('click', ()=>{
+      const pin = inputs.map(i=>i.value).join('');
+      if(pin==='1025'){
+        err.textContent=''; gate.style.display='none'; app.classList.add('ready');
+        tryPlay(); spawnBurst(18);
+      }else{
+        err.textContent='密碼錯誤 😳 再試一次（提示：妳的生日）';
+        inputs.forEach(i=>i.value=''); inputs[0].focus();
+      }
+    });
+
+    // ====== 背景輪播 ======
+    const bgs = [document.getElementById('bg1'), document.getElementById('bg2'), document.getElementById('bg3')];
+    let bi=0; setInterval(()=>{ bgs.forEach((img,idx)=> img.classList.toggle('show', idx===bi)); bi=(bi+1)%bgs.length; }, 4500);
+
+    // ====== 點擊後才逐字顯示 ======
+    let revealed=false;
+    revealBtn.addEventListener('click', ()=>{
+      if(revealed) return; revealed=true;
+      revealBtn.style.display='none';
+      typeText(cardText, letterEl, 26);
+      setTimeout(()=>spawnBurst(28), 300);
+    });
+
+    function typeText(text, el, speed){
+      el.classList.add('typing');
+      let i=0; const timer = setInterval(()=>{
+        el.textContent = text.slice(0, i++);
+        if(i>text.length){ clearInterval(timer); el.classList.remove('typing'); }
+      }, speed);
+    }
+
+    // ====== 漂浮愛心 ======
+    function spawnHeart(){
+      const h=document.createElement('div'); h.className='heart';
+      h.textContent=['💗','💖','💕','💞'][Math.floor(Math.random()*4)];
+      h.style.left=Math.random()*100+'vw';
+      h.style.setProperty('--dx', (Math.random()*60-30)+'px');
+      h.style.animationDuration=(4+Math.random()*3)+'s';
+      document.body.appendChild(h); setTimeout(()=>h.remove(),7000);
+    }
+    function spawnBurst(n){ for(let i=0;i<n;i++) setTimeout(spawnHeart, i*100); }
+    setInterval(()=> Math.random()<0.25 && spawnHeart(), 1600);
+
+    // ====== 控制：音樂、下載 ======
+    btnAudio.addEventListener('click', ()=>{ isPlaying ? pause() : tryPlay(); });
+
+    btnSave.addEventListener('click', async()=>{
+      const node = document.getElementById('card');
+      const canvas = await html2canvas(node, {backgroundColor:null, scale:2});
+      const url = canvas.toDataURL('image/png');
+      const a = document.createElement('a'); a.href=url; a.download='birthday-card.png'; a.click();
+    });
+  </script>
+</body>
+</html>
